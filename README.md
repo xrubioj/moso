@@ -1,6 +1,7 @@
 # Moso
 
-**Moso** is a minimal macOS menu bar app written in Swift, based on the awesome
+**Moso** is a minimal macOS menu bar app written in Swift. This is a for of
+[rschiang/moso], which is based on the awesome
 [Pomodoro] project. Other pomodoro apps do too much, don't look good,
 or have ads. Moso does exactly what it needs to do, and doesn't have ads.
 
@@ -22,8 +23,10 @@ Moso is released under [MIT License].
 
 [Moso]: https://www.moedict.tw/:摸挲
 
+[rschiang/moso]: https://github.com/rschiang/moso
+
 [Pomodoro]: https://github.com/apas/pomodoro
 
-[releases]: https://github.com/apas/pomodoro/releases
+[releases]: https://github.com/xrubioj/moso/releases
 
 [MIT License]: LICENSE.md
