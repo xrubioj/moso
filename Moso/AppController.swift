@@ -21,9 +21,11 @@ class AppController: NSObject, AppTimerDelegate, AppNotificationDelegate {
 
     override func awakeFromNib() {
         statusItem = NSStatusBar.system.statusItem(
-                                        withLength: NSStatusItem.squareLength)
+                                        withLength: NSStatusItem.variableLength)
         statusItem.button?.image = NSImage(named: "StatusBarButtonImage")
+        statusItem.button?.imagePosition = NSControl.ImagePosition.imageLeft
         statusItem.isVisible = true
+        statusItem.button?.title = ""
         if #available(OSX 10.12, *) {
             statusItem.behavior = NSStatusItem.Behavior.terminationOnRemoval
         }
@@ -101,11 +103,14 @@ class AppController: NSObject, AppTimerDelegate, AppNotificationDelegate {
         let count = timer.count
 
         if count > 0 {
-            statMenuItem.title = String(format: "%02d:%02d %@",
-                                        count / 60, count % 60,
+            let formattedTime = String(format: "%02d:%02d", count / 60, count % 60)
+            statMenuItem.title = String(format: "%@ %@",
+                                        formattedTime,
                                         status == .task ? "Task" : "Break")
+            statusItem.button?.title = formattedTime
         } else {
             statMenuItem.title = "Idle"
+            statusItem.button?.title = ""
         }
 
         statMenuItem.isHidden = (status == .idle)
