@@ -27,7 +27,7 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>© 2020 Poren Chiang et al. Released under MIT License; refer to project LICENSE for details.</string>
+	<string>© 2023 Xavier Rubio Jansana et al. Released under MIT License; refer to project LICENSE for details.</string>
 	<key>NSMainStoryboardFile</key>
 	<string>Main</string>
 	<key>NSPrincipalClass</key>
