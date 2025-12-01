@@ -19,34 +19,25 @@ jobs:
 
       - name: Build Universal App
         run: |
+          set -e
           xcodebuild \
             -project "${{ env.APP_NAME }}.xcodeproj" \
             -scheme "${{ env.APP_NAME }}" \
             -configuration Release \
-            -arch arm64 -arch x86_64 \
-            build
+            -derivedDataPath ./DerivedData \
+            ARCHS="arm64 x86_64" \
+            clean build
 
       - name: Prepare App Bundle
         run: |
           set -e
           APP_NAME="${{ env.APP_NAME }}"
-          echo "Looking for ${APP_NAME}.app in DerivedData..."
-          APP_PATH="$(find ~/Library/Developer/Xcode/DerivedData -type d -name "${APP_NAME}.app" -print -quit 2>/dev/null || true)"
-
-          if [ -z "$APP_PATH" ]; then
-            echo "Not found in DerivedData — searching build/Release..."
-            APP_PATH="$(find build -type d -name "${APP_NAME}.app" -print -quit 2>/dev/null || true)"
-          fi
-
-          if [ -z "$APP_PATH" ]; then
-            echo "Searching ~/Library/Developer/Xcode/DerivedData/*/Build/Products/*/Release for ${APP_NAME}.app..."
-            APP_PATH="$(find ~/Library/Developer/Xcode/DerivedData -path "*/Build/Products/*/Release/${APP_NAME}.app" -print -quit 2>/dev/null || true)"
-          fi
-
-          if [ -z "$APP_PATH" ]; then
-            echo "ERROR: ${APP_NAME}.app not found. Searched DerivedData and build directories." >&2
-            echo "List of DerivedData directories for debugging:"
-            ls -la ~/Library/Developer/Xcode/DerivedData || true
+          echo "Expecting ${APP_NAME}.app in ./DerivedData/Build/Products/Release..."
+          APP_PATH="$(pwd)/DerivedData/Build/Products/Release/${APP_NAME}.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "ERROR: ${APP_NAME}.app not found at expected path: $APP_PATH" >&2
+            echo "Listing DerivedData Build/Products for debugging:"
+            ls -la ./DerivedData/Build/Products || true
             exit 1
           fi
 
@@ -67,6 +58,8 @@ jobs:
           APP_NAME="${{ env.APP_NAME }}"
           mkdir dmg_src
           cp -R "dist/${APP_NAME}.app" dmg_src/
+
+          ln -s /Applications dmg_src/Applications || true
 
           hdiutil create \
             -volname "${APP_NAME}" \
