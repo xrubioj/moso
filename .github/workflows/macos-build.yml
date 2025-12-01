@@ -75,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "${{ env.APP_NAME }}-macOS-Universal-app"
-          path: dist/${{ env.APP_NAME }}.app
+          path: dist/
 
       - name: Upload DMG Artifact
         uses: actions/upload-artifact@v4
