@@ -55,6 +55,12 @@ jobs:
           /usr/bin/ditto "$APP_PATH" "dist/${APP_NAME}.app"
           echo "Copied to dist/${APP_NAME}.app"
 
+      - name: Upload App Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "${{ env.APP_NAME }}-macOS-Universal-app"
+          path: dist/
+
       - name: Create DMG
         run: |
           set -e
@@ -70,12 +76,6 @@ jobs:
             "dist/${APP_NAME}.dmg"
 
           echo "DMG created at dist/${APP_NAME}.dmg"
-
-      - name: Upload App Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: "${{ env.APP_NAME }}-macOS-Universal-app"
-          path: dist/
 
       - name: Upload DMG Artifact
         uses: actions/upload-artifact@v4
