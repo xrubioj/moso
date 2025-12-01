@@ -1,0 +1,54 @@
+name: macOS Universal Build + DMG
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-26
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app
+
+      - name: Build Universal App
+        run: |
+          xcodebuild \
+            -project Moso.xcodeproj \
+            -scheme Moso \
+            -configuration Release \
+            -arch arm64 -arch x86_64 \
+            build
+
+      - name: Prepare App Bundle
+        run: |
+          mkdir -p dist
+          cp -R build/Release/Moso.app dist/
+
+      - name: Create DMG
+        run: |
+          mkdir dmg_src
+          cp -R dist/Moso.app dmg_src/
+
+          hdiutil create \
+            -volname "Moso" \
+            -srcfolder dmg_src \
+            -format UDZO \
+            -ov \
+            dist/Moso.dmg
+
+      - name: Upload App Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Moso-macOS-Universal-app
+          path: dist/Moso.app
+
+      - name: Upload DMG Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Moso-macOS-Universal-dmg
+          path: dist/Moso.dmg
