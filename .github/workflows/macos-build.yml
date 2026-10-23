@@ -3,6 +3,7 @@ name: macOS Universal Build + DMG
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
 
 jobs:
@@ -17,6 +18,17 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -switch /Applications/Xcode.app
 
+      - name: Determine Version
+        run: |
+          # TODO: Improve versioning for non-tag builds
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            APP_VERSION="${GITHUB_REF_NAME#v}"
+          else
+            APP_VERSION="0.0.0"
+          fi
+          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
+          echo "Building version $APP_VERSION"
+
       - name: Build Universal App
         run: |
           set -e
@@ -26,6 +38,7 @@ jobs:
             -configuration Release \
             -derivedDataPath ./DerivedData \
             ARCHS="arm64 x86_64" \
+            MARKETING_VERSION="${{ env.APP_VERSION }}" \
             clean build
 
       - name: Prepare App Bundle
@@ -52,6 +65,17 @@ jobs:
           name: "${{ env.APP_NAME }}-macOS-Universal-app"
           path: dist/
 
+      - name: Zip App
+        run: |
+          set -e
+          ditto -c -k --keepParent "dist/${{ env.APP_NAME }}.app" "dist/${{ env.APP_NAME }}.zip"
+
+      - name: Upload Zip Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: "${{ env.APP_NAME }}-macOS-Universal-zip"
+          path: dist/${{ env.APP_NAME }}.zip
+
       - name: Create DMG
         run: |
           set -e
@@ -75,3 +99,28 @@ jobs:
         with:
           name: "${{ env.APP_NAME }}-macOS-Universal-dmg"
           path: dist/${{ env.APP_NAME }}.dmg
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: "*-macOS-Universal-{dmg,zip}"
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh release create "${{ github.ref_name }}" \
+            --repo "${{ github.repository }}" \
+            --title "${{ github.ref_name }}" \
+            --generate-notes \
+            artifacts/*.dmg artifacts/*.zip

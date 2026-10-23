@@ -26,6 +26,38 @@ few minutes to understand it does exactly what it advertises, no more, no less.
 
 Download Moso from the [releases] page.
 
+## Making a release
+
+Releases are built and published by the `macOS Universal Build + DMG` GitHub
+Actions workflow whenever a tag starting with `v` is pushed. The app version is
+taken from the tag (without the leading `v`); builds that are not triggered by a
+tag use version `0.0.0`.
+
+1. Make sure `main` contains everything that should go into the release.
+2. Create and push a tag for the new version:
+
+   ```sh
+   git checkout main
+   git pull
+   git tag v1.2.3
+   git push origin v1.2.3
+   ```
+
+3. Wait for the workflow to finish in the [Actions] tab. It builds a universal
+   (Apple Silicon + Intel) app and creates a GitHub release named after the tag,
+   with auto-generated release notes and two downloads attached:
+   - `Moso.dmg`: disk image with the app and an `Applications` shortcut.
+   - `Moso.zip`: the zipped `Moso.app`.
+4. Optionally, edit the release notes on the [releases] page.
+
+If the build fails, fix the problem, then delete the tag (and the release, if it
+was created) and push the tag again:
+
+```sh
+git tag -d v1.2.3
+git push origin :refs/tags/v1.2.3
+```
+
 ## License
 
 Moso is released under [MIT License].
@@ -37,5 +69,7 @@ Moso is released under [MIT License].
 [Pomodoro]: https://github.com/apas/pomodoro
 
 [releases]: https://github.com/xrubioj/moso/releases
+
+[Actions]: https://github.com/xrubioj/moso/actions
 
 [MIT License]: LICENSE.md
