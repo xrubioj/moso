@@ -28,13 +28,32 @@ Download Moso from the [releases] page.
 
 ## Making a release
 
-Releases are built and published by the `macOS Universal Build + DMG` GitHub
-Actions workflow whenever a tag starting with `v` is pushed. The app version is
-taken from the tag (without the leading `v`); builds that are not triggered by a
-tag use version `0.0.0`.
+Releases are built by the `macOS Universal Build + DMG` GitHub Actions workflow
+whenever a tag starting with `v` is pushed. The workflow builds a universal
+(Apple Silicon + Intel) app and attaches two downloads to the GitHub release for
+that tag:
 
-1. Make sure `main` contains everything that should go into the release.
-2. Create and push a tag for the new version:
+- `Moso.dmg`: disk image with the app and an `Applications` shortcut.
+- `Moso.zip`: the zipped `Moso.app`.
+
+The app version is taken from the tag (without the leading `v`); builds that are
+not triggered by a tag use version `0.0.0`.
+
+There are two ways to make a release. In both cases, first make sure `main`
+contains everything that should go into the release.
+
+### From the GitHub web page
+
+1. On the [releases] page, click **Draft a new release**.
+2. Choose a new tag (e.g. `v1.2.3`) targeting `main`, fill in the title and
+   release notes, and click **Publish release**.
+3. Publishing the release creates the tag, which triggers the workflow. Wait for
+   it to finish in the [Actions] tab; it uploads the DMG and the zip to the
+   existing release.
+
+### From the command line
+
+1. Create and push a tag for the new version:
 
    ```sh
    git checkout main
@@ -43,17 +62,19 @@ tag use version `0.0.0`.
    git push origin v1.2.3
    ```
 
-3. Wait for the workflow to finish in the [Actions] tab. It builds a universal
-   (Apple Silicon + Intel) app and creates a GitHub release named after the tag,
-   with auto-generated release notes and two downloads attached:
-   - `Moso.dmg`: disk image with the app and an `Applications` shortcut.
-   - `Moso.zip`: the zipped `Moso.app`.
-4. Optionally, edit the release notes on the [releases] page.
+2. Wait for the workflow to finish in the [Actions] tab. Since no release exists
+   for the tag, it creates one named after the tag, with auto-generated release
+   notes, and attaches the DMG and the zip.
+3. Optionally, edit the release notes on the [releases] page.
 
-If the build fails, fix the problem, then delete the tag (and the release, if it
-was created) and push the tag again:
+### If the build fails
+
+The workflow builds the code at the tagged commit, so re-running it won't pick up
+fixes made afterwards. Fix the problem on `main`, delete the release (if it was
+created) and the tag, and make the release again:
 
 ```sh
+gh release delete v1.2.3 --yes
 git tag -d v1.2.3
 git push origin :refs/tags/v1.2.3
 ```
